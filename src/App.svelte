@@ -196,6 +196,7 @@
 			}
 			
 			handleSave = () => {
+				ctx.clearRect(0, 0, canvas.width, canvas.height);
 				createEffect();
 				toggle();
 			}
@@ -284,6 +285,14 @@
 	/>
 
 	<div class="controls">
+		<!-- <a outline color="light" role="button" href="https://github.com/shanehokw/svelte-js-particle-effects" class="btn">
+			<Icon name="github" style="font-size: 2rem;" />
+		</a> -->
+		<Button outline color="light" on:click={effect.warp()}>
+			<a href="https://github.com/shanehokw/svelte-js-particle-effects">
+				<Icon name="github" style="font-size: 2rem;" />
+			</a>
+		</Button>
 		<Button outline color="light" on:click={effect.warp()}>
 			<Icon name="arrow-clockwise" style="font-size: 2rem;" />
 		</Button>
@@ -395,6 +404,14 @@
 	#image {
 		display: none;
 		width: 1rem;
+	}
+
+	:global(.controls a) {
+		color: white !important;
+	}
+
+	:global(.controls a):hover {
+		color: black !important;
 	}
 
 	:global(.controls button) {
