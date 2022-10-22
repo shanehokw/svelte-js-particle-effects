@@ -5,12 +5,10 @@
 		ModalBody,
 		ModalFooter,
 		ModalHeader,
-		Icon,
-		Spinner
+		Icon
 	} from 'sveltestrap';
 	import Slider from '@smui/slider';
 	import imgSrc from './imgSrc';
-	// import Effect from './Effect'
 
 	let mouseRadius = 5000;
 	let pixelSize = 5;
@@ -27,35 +25,16 @@
 	var canvas;
 	var ctx;
 	let selectImage;
+	let createEffect;
 
-	
 	window.addEventListener("load", () => {
-		function drawOnCanvas(image){
+		function drawOnCanvas(){
 			canvas = document.getElementById("canvas");
 			ctx = canvas.getContext("2d", {willReadFrequently: true});
 			
 			canvas.width = window.innerWidth;
 			canvas.height = window.innerHeight;
 			
-			// canvas.offscreenCanvas = document.createElement("canvas");
-			// canvas.offscreenCanvas.width = canvas.width;
-			// canvas.offscreenCanvas.height = canvas.height;
-			
-			// console.log((canvas.width * 0.5) - (image.width * 0.5));
-			// console.log((canvas.height * 0.5) - (image.height * 0.5));
-			console.table({
-				canvasWidth: canvas.width,
-				canvasHeight: canvas.height,
-				imageWidth: image.width,
-				imageHeight: image.height
-			});
-
-			console.table({mouseRadius, pixelSize, ease, friction});
-			// step 1: draw image on canvas
-			ctx.drawImage(image, Math.floor((canvas.width * 0.5) - (image.width * 0.5)), Math.floor((canvas.height * 0.5) - (image.height * 0.5)));
-			// step 2: analyse canvas for pixel data
-			const pixels = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
-
 			// each particle will be a pixel in the image
 			// break the image into individual pieces, at the same time
 			// these particles will react to mouse in a dynamic way with friction and physics
@@ -137,10 +116,11 @@
 					this.height = height;
 					this.particlesArray = [];
 					// this.image = image;
+					this.image = document.getElementById("image");
 					this.centerX = this.width * 0.5;
 					this.centerY = this.height * 0.5;
-					this.x = this.centerX - image.width * 0.5;
-					this.y = this.centerY - image.height * 0.5;
+					this.x = this.centerX - this.image.width * 0.5;
+					this.y = this.centerY - this.image.height * 0.5;
 					this.gap = pixelSize; // higher value = better performance but bigger paricle chunk
 					this.mouse = {
 						radius: mouseRadius,
@@ -159,6 +139,10 @@
 					});
 				}
 				init() {
+					// step 1: draw image on canvas
+					ctx.drawImage(this.image, Math.floor((canvas.width * 0.5) - (this.image.width * 0.5)), Math.floor((canvas.height * 0.5) - (this.image.height * 0.5)));
+					// step 2: analyse canvas for pixel data
+					const pixels = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
 					// step 3: loop through pixels
 					for (let y = 0; y < this.height; y += this.gap) {
 						for (let x = 0; x < this.width; x += this.gap) {
@@ -189,10 +173,15 @@
 				warp() {
 					this.particlesArray.forEach((particle) => particle.warp());
 				}
+
+				destroy() {
+					this.particlesArray.forEach((particle) => Object.keys(particle).forEach((prop) => delete particle[prop]))
+				}
 			}
 		
-			function createEffect() {
+			createEffect = () => {
 				if (effect) {
+					effect.destroy();
 					effect = null;
 				}
 				effect = new Effect(canvas.width, canvas.height);
@@ -205,24 +194,26 @@
 				effect.update();
 				requestAnimationFrame(animate);
 			}
-		
-			createEffect();
-			animate();
 			
 			handleSave = () => {
 				createEffect();
 				toggle();
 			}
-		}
-		
-		selectImage = (option) => {
-			ctx.clearRect(0, 0, canvas.width, canvas.height);
-			let imgId = option.getElementsByTagName('img')[0].id;
-			const img = document.getElementById("image");
-			img.src = imgSrc[imgId];
-			img.addEventListener("load", () => {
-				drawOnCanvas(img);
-			});
+			
+			selectImage = (option) => {
+				// cannot take the img.src directly from the chosen option
+				// because it takes in the rendered size, not actual size
+				let imgId = option.getElementsByTagName('img')[0].id;
+				const img = document.getElementById("image");
+				img.src = imgSrc[imgId];
+				img.addEventListener("load", () => {
+					ctx.clearRect(0, 0, canvas.width, canvas.height);
+					createEffect();
+				});
+			}
+			
+			createEffect();
+			animate();
 		}
 		
 		const imageInput = document.getElementById("image-input");
@@ -233,9 +224,9 @@
 			const reader = new FileReader();
 			reader.addEventListener("load", () => {
 				img.src = reader.result;
-				ctx.clearRect(0, 0, canvas.width, canvas.height);
 				img.addEventListener("load", () => {
-					drawOnCanvas(img);
+					ctx.clearRect(0, 0, canvas.width, canvas.height);
+					createEffect();
 				});
 			})
 			if (file) {
@@ -243,10 +234,8 @@
 			}
 		});
 
-		const image = document.getElementById("image");
-		drawOnCanvas(image);
+		drawOnCanvas();
 	});
-
 </script>
 
 <svelte:head>
@@ -376,6 +365,7 @@
 		justify-content: center;
 		align-items: center;
 		border-radius: 10%;
+		padding: 0.3rem;
 	}
 
 	.image-options:hover {
@@ -385,7 +375,9 @@
 	}
 
 	.image-options:focus {
-		filter: drop-shadow(2px 2px 6px black);
+		/* filter: drop-shadow(2px 2px 6px black); */
+		background: white;
+		color: black;
 	}
 
 	#canvas {
