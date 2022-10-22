@@ -288,11 +288,11 @@
 		<!-- <a outline color="light" role="button" href="https://github.com/shanehokw/svelte-js-particle-effects" class="btn">
 			<Icon name="github" style="font-size: 2rem;" />
 		</a> -->
-		<Button outline color="light" on:click={effect.warp()}>
-			<a href="https://github.com/shanehokw/svelte-js-particle-effects">
+		<!-- <Button outline color="light"> -->
+			<a class="btn btn-outline-light" href="https://github.com/shanehokw/svelte-js-particle-effects" role="button">
 				<Icon name="github" style="font-size: 2rem;" />
 			</a>
-		</Button>
+		<!-- </Button> -->
 		<Button outline color="light" on:click={effect.warp()}>
 			<Icon name="arrow-clockwise" style="font-size: 2rem;" />
 		</Button>
@@ -414,7 +414,7 @@
 		color: black !important;
 	}
 
-	:global(.controls button) {
+	:global(.controls .btn) {
 		border-radius: 100% !important;
 		padding: 0.5rem 1rem !important;
 	}
