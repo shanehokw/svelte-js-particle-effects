@@ -8,5 +8,6 @@ Built on Svelte framework for easy frontend building with Sveltestrap and Svelte
 
 Future updates (hopefully!)  
 1. Responsiveness
-2. Choose from set of images
-3. Upload own image
+
+Known issues:
+1. Performance drops after several redraws (quick fix: refresh page)
