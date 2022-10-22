@@ -10,4 +10,4 @@ Future updates (hopefully!)
 1. Responsiveness
 
 Known issues:
-1. Performance drops after several redraws (quick fix: refresh page)
+1. Redraw has slight delay after many redraws
