@@ -9,10 +9,11 @@
 		Spinner
 	} from 'sveltestrap';
 	import Slider from '@smui/slider';
+	import imgSrc from './imgSrc';
 	// import Effect from './Effect'
 
 	let mouseRadius = 5000;
-	let pixelSize = 10;
+	let pixelSize = 5;
 	let ease = 0.05;
 	let friction = 0.7;
 
@@ -25,7 +26,9 @@
 	let handleSave;
 	var canvas;
 	var ctx;
+	let selectImage;
 
+	
 	window.addEventListener("load", () => {
 		function drawOnCanvas(image){
 			canvas = document.getElementById("canvas");
@@ -34,8 +37,22 @@
 			canvas.width = window.innerWidth;
 			canvas.height = window.innerHeight;
 			
+			// canvas.offscreenCanvas = document.createElement("canvas");
+			// canvas.offscreenCanvas.width = canvas.width;
+			// canvas.offscreenCanvas.height = canvas.height;
+			
+			// console.log((canvas.width * 0.5) - (image.width * 0.5));
+			// console.log((canvas.height * 0.5) - (image.height * 0.5));
+			console.table({
+				canvasWidth: canvas.width,
+				canvasHeight: canvas.height,
+				imageWidth: image.width,
+				imageHeight: image.height
+			});
+
+			console.table({mouseRadius, pixelSize, ease, friction});
 			// step 1: draw image on canvas
-			ctx.drawImage(image, (canvas.width * 0.5) - (image.width * 0.5), (canvas.height * 0.5) - (image.height * 0.5));
+			ctx.drawImage(image, Math.floor((canvas.width * 0.5) - (image.width * 0.5)), Math.floor((canvas.height * 0.5) - (image.height * 0.5)));
 			// step 2: analyse canvas for pixel data
 			const pixels = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
 
@@ -197,22 +214,20 @@
 				toggle();
 			}
 		}
-
+		
+		selectImage = (option) => {
+			ctx.clearRect(0, 0, canvas.width, canvas.height);
+			let imgId = option.getElementsByTagName('img')[0].id;
+			const img = document.getElementById("image");
+			img.src = imgSrc[imgId];
+			img.addEventListener("load", () => {
+				drawOnCanvas(img);
+			});
+		}
 		
 		const imageInput = document.getElementById("image-input");
 		
 		imageInput.addEventListener("change", () => {
-			// var imageFile = imageInput.files;
-			// if (imageFile.length > 0) {
-			// 	var imageSrc = imageInput[0];
-				
-			// 	const fileReader = new FileReader();
-			// 	fileReader.addEventListener("load", () => {
-			// 		console.log(fileReader.result);
-			// 	});
-			// 	var image64 = fileReader.readAsDataURL(imageSrc);
-			// 	console.log(image64);
-			// }
 			const img = document.getElementById("image");
 			const file = imageInput.files[0];
 			const reader = new FileReader();
@@ -224,7 +239,7 @@
 				});
 			})
 			if (file) {
-				var fileData = reader.readAsDataURL(file);
+				reader.readAsDataURL(file);
 			}
 		});
 
@@ -243,20 +258,34 @@
 	<canvas id="canvas"></canvas>
 
 	<div class="image-selection">
+		<div class="image-options" on:click={selectImage(this)} on:keydown={selectImage(this)}>
+			<img 
+				id="rocket"
+				alt="rocket" 
+				class="image-options-source"
+				src={imgSrc.rocket}
+			>
+		</div>
+		<div class="image-options" on:click={selectImage(this)} on:keydown={selectImage(this)}>
+			<img 
+				id="astronaut"
+				alt="astronaut" 
+				class="image-options-source"
+				src={imgSrc.astronaut}
+			>
+		</div>
+		<div class="image-options" on:click={selectImage(this)} on:keydown={selectImage(this)}>
+			<img 
+				id="planet"
+				alt="planet" 
+				class="image-options-source"
+				src={imgSrc.planet}
+			>
+		</div>
 		<label for="image-input" class="image-options" aria-label="Choose image to upload">
 			<Icon name="plus" style="font-size: 2rem;"></Icon>
 		</label>
 		<input id="image-input" type="file" accept="image/*"/>
-
-		<!-- <label for="image-input2" class="image-options" aria-label="Choose image to upload">
-			<Icon name="plus" style="font-size: 2rem;"></Icon>
-		</label>
-		<input id="image-input2" type="file" accept="image/*"/>
-
-		<label for="image-input3" class="image-options" aria-label="Choose image to upload">
-			<Icon name="plus" style="font-size: 2rem;"></Icon>
-		</label>
-		<input id="image-input3" type="file" accept="image/*"/> -->
 	</div>
 
 	<img
@@ -325,9 +354,8 @@
 		gap: 1rem;
 	}
 
-	.image-selection > * {
-		/* position: absolute;
-		z-index: 1000; */
+	.image-options-source {
+		width: 100%;
 	}
 
 	.image-selection > input[type=file] {
@@ -356,6 +384,10 @@
 		color: black;
 	}
 
+	.image-options:focus {
+		filter: drop-shadow(2px 2px 6px black);
+	}
+
 	#canvas {
 		position: absolute;
 	}
@@ -368,7 +400,7 @@
 		margin: 0 2rem 2rem 0;
 	}
 
-	img {
+	#image {
 		display: none;
 		width: 1rem;
 	}
