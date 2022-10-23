@@ -140,7 +140,17 @@
 				}
 				init() {
 					// step 1: draw image on canvas
-					ctx.drawImage(this.image, Math.floor((canvas.width * 0.5) - (this.image.width * 0.5)), Math.floor((canvas.height * 0.5) - (this.image.height * 0.5)));
+					// if image is larger than canvas, scale it to fit the canvas
+					if (this.image.width >= canvas.width || this.image.height >= canvas.height) {
+						var hRatio = canvas.width  / this.image.width    ;
+						var vRatio =  canvas.height / this.image.height  ;
+						var ratio  = Math.min ( hRatio, vRatio );
+						var centerShift_x = ( canvas.width - this.image.width*ratio ) / 2;
+						var centerShift_y = ( canvas.height - this.image.height*ratio ) / 2; 
+						ctx.drawImage(this.image, 0,0, this.image.width, this.image.height, centerShift_x, centerShift_y, Math.floor(this.image.width*ratio), Math.floor(this.image.height*ratio));  
+					} else {
+						ctx.drawImage(this.image, Math.floor((canvas.width * 0.5) - (this.image.width * 0.5)), Math.floor((canvas.height * 0.5) - (this.image.height * 0.5)));
+					}
 					// step 2: analyse canvas for pixel data
 					const pixels = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
 					// step 3: loop through pixels
@@ -333,6 +343,11 @@
 		margin: 0;
 		padding: 0;
 	}
+
+	main {
+		display: flex;
+		justify-content: center;
+	}
 	
 	:global(body) {
 		background-color: black !important;
@@ -346,9 +361,8 @@
 	.image-selection {
 		display: flex;
 		justify-content: center;
-		padding-top: 2.5rem;
+		top: 2.5rem;
 		position: absolute;
-		width: 100%;
 		gap: 1rem;
 	}
 
@@ -357,12 +371,12 @@
 	}
 
 	.image-selection > input[type=file] {
-		opacity: 0;
-
 		/* hide the input itself as it is hard to style */
 		/* apply styles to <label> because clicking on label works the same as clicking on input */
+		opacity: 0;
 		width: 0;
 		height: 0;
+		position: absolute; /* remove from normal flow, to not have additional gap from parent gap: 1rem; */
 	}
 
 	.image-options {
@@ -395,10 +409,10 @@
 
 	.controls {
 		position: absolute;
-		z-index: 100;
-		bottom: 0;
-		right: 0;
-		margin: 0 2rem 2rem 0;
+		bottom: 2rem;
+		right: 2rem;
+		display: flex;
+		gap: 1rem;
 	}
 
 	#image {
